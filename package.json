@@ -1,0 +1,8 @@
+{
+  "name": "sailing-image-resizer",
+  "description": "Resizes images",
+  "environment": {},
+  "dependencies": {
+    "sharp": "^0.22.1"
+  }
+}
