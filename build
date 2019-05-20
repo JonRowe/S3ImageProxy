@@ -1,0 +1,1 @@
+zip -r image.zip index.js node_modules/ package.json package-lock.json
