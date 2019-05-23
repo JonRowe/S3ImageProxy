@@ -2,17 +2,18 @@ const AWS = require('aws-sdk');
 const s3 = new AWS.S3();
 const sharp = require('sharp');
 
-const bucket = 'sailing-uploads';
+const inputBucket = process.env.INPUT_BUCKET;
+const outputBucket = process.env.OUTPUT_BUCKET;
 
 function handleError(error) {
   return { statusCode: 500, body: JSON.stringify({"status": "error", "message": error}) };
 }
 
-function downloadImage(key, bucket) {
+function downloadImage(key) {
   return new Promise((resolve, reject) => {
-    console.log("Downloading: '" + key + "' from '" + bucket + "'.");
+    console.log("Downloading: '" + key + "' from '" + inputBucket + "'.");
     s3
-    .getObject({Bucket: bucket, Key: key}, (error, data) => {
+    .getObject({Bucket: inputBucket, Key: key}, (error, data) => {
       if(error) {
         console.log("Error downloading: ", error);
         return reject("Error downloading source from S3.");
@@ -50,7 +51,7 @@ function storeResizedImage(newKey) {
       console.log("Uploading resized image '" + newKey + "' to '" + outputBucket + "'.");
 
       s3
-        .putObject({Bucket: bucket, Key: newKey, Body: resizedData.Body}, (error, data) => {
+        .putObject({Bucket: outputBucket, Key: newKey, Body: resizedData}, (error, data) => {
           if (error) {
             console.log("Error uploading to S3:", error);
           }
@@ -86,7 +87,7 @@ exports.handler = async (event, context) => {
   }
 
   return (
-    downloadImage(key, bucket)
+    downloadImage(key)
       .then(resizeImage(intSize))
       .then(storeResizedImage(newKey))
       .then((data) => {
